@@ -18,15 +18,20 @@ import teamtreehouse.com.stormy.weather.Day;
 
 public class DailyFragment extends Fragment {
 private Day [] mDays;
+    public interface onDailyForecastSelectedInterface {
+        void onDailyForecastSelected (int index);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        onDailyForecastSelectedInterface listener = (onDailyForecastSelectedInterface) getActivity();
         View view = inflater.inflate(R.layout.fragment_daily_forecast, container, false);
         ListView listView = (ListView) view.findViewById(R.id.dailyListView);
         Bundle bundle = getArguments();
         Parcelable[] parcelables = bundle.getParcelableArray(MainActivity.DAILY_FORECAST);
         mDays = Arrays.copyOf(parcelables, parcelables.length, Day[].class);
-        DayAdapter dayAdapter = new DayAdapter (getActivity(), mDays);
+        DayAdapter dayAdapter = new DayAdapter (getActivity(), mDays, listener);
         listView.setAdapter(dayAdapter);
         listView.setEmptyView(view.findViewById(R.id.emptyTextView));
         return view;

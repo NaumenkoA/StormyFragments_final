@@ -9,16 +9,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import teamtreehouse.com.stormy.R;
+import teamtreehouse.com.stormy.ui.DailyFragment;
 import teamtreehouse.com.stormy.weather.Day;
 
-public class DayAdapter extends BaseAdapter {
+public class DayAdapter extends BaseAdapter implements View.OnClickListener {
 
+    private DailyFragment.onDailyForecastSelectedInterface mListener;
     private Context mContext;
     private Day[] mDays;
+    private int mIndex;
 
-    public DayAdapter(Context context, Day[] days) {
+    public DayAdapter(Context context, Day[] days, DailyFragment.onDailyForecastSelectedInterface listener) {
         mContext = context;
         mDays = days;
+        mListener = listener;
     }
 
     @Override
@@ -39,7 +43,7 @@ public class DayAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-
+        mIndex = position;
         if (convertView == null) {
             // brand new
             convertView = LayoutInflater.from(mContext).inflate(R.layout.daily_list_item, null);
@@ -67,6 +71,11 @@ public class DayAdapter extends BaseAdapter {
         }
 
         return convertView;
+    }
+
+    @Override
+    public void onClick(View view) {
+        mListener.onDailyForecastSelected(mIndex);
     }
 
     private static class ViewHolder {

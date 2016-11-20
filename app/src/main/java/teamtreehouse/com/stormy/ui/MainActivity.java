@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -40,7 +39,7 @@ import teamtreehouse.com.stormy.weather.Forecast;
 import teamtreehouse.com.stormy.weather.Hour;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DailyFragment.onDailyForecastSelectedInterface {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String DAILY_FORECAST = "DAILY_FORECAST";
@@ -289,12 +288,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     @OnClick (R.id.hourlyButton)
-    public void startHourlyActivity(View view) {
-        Intent intent = new Intent(this, HourlyForecastActivity.class);
-        intent.putExtra(HOURLY_FORECAST, mForecast.getHourlyForecast());
-        startActivity(intent);
+    public void showHourlyFragment(View view) {
+        Bundle bundle = new Bundle();
+        Hour[] hours = mForecast.getHourlyForecast();
+        bundle.putParcelableArray(HOURLY_FORECAST, hours);
+        Fragment fragment = new HourlyFragment();
+        fragment.setArguments(bundle);
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.placeholder, fragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void onDailyForecastSelected(int index) {
+        Day [] days = mForecast.getDailyForecast();
+        String dayOfTheWeek = days[index].getDayOfTheWeek();
+        String conditions = days[index].getSummary();
+        String highTemp = days[index].getTemperatureMax() + "";
+        String message = String.format("On %s the high will be %s and it will be %s",
+                dayOfTheWeek,
+                highTemp,
+                conditions);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }
 
