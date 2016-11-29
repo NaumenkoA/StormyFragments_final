@@ -10,16 +10,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import teamtreehouse.com.stormy.R;
+import teamtreehouse.com.stormy.ui.HourlyFragment;
 import teamtreehouse.com.stormy.weather.Hour;
 
 public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder> {
 
     private Hour[] mHours;
-    private Context mContext;
+    private HourlyFragment.onHourlyForecastSelectedInterface mListener;
 
-    public HourAdapter(Context context, Hour[] hours) {
-        mContext = context;
+    public HourAdapter(Hour[] hours, HourlyFragment.onHourlyForecastSelectedInterface listener) {
         mHours = hours;
+        mListener = listener;
     }
 
     @Override
@@ -33,12 +34,13 @@ public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder
     @Override
     public void onBindViewHolder(HourViewHolder holder, int position) {
         holder.bindHour(mHours[position]);
-    }
+            }
 
     @Override
     public int getItemCount() {
         return mHours.length;
     }
+
 
     public class HourViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
@@ -47,6 +49,7 @@ public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder
         public TextView mSummaryLabel;
         public TextView mTemperatureLabel;
         public ImageView mIconImageView;
+        private int mIndex;
 
         public HourViewHolder(View itemView) {
             super(itemView);
@@ -68,14 +71,7 @@ public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder
 
         @Override
         public void onClick(View v) {
-            String time = mTimeLabel.getText().toString();
-            String temperature = mTemperatureLabel.getText().toString();
-            String summary = mSummaryLabel.getText().toString();
-            String message = String.format("At %s it will be %s and %s",
-                    time,
-                    temperature,
-                    summary);
-            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+                    mListener.onHourlyForecastSelected(getAdapterPosition());
         }
     }
 }

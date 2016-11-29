@@ -1,5 +1,6 @@
 package teamtreehouse.com.stormy.ui;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -39,11 +40,14 @@ import teamtreehouse.com.stormy.weather.Forecast;
 import teamtreehouse.com.stormy.weather.Hour;
 
 
-public class MainActivity extends AppCompatActivity implements DailyFragment.onDailyForecastSelectedInterface {
+public class MainActivity extends Activity
+        implements HourlyFragment.onHourlyForecastSelectedInterface {
 
     public static final String TAG = MainActivity.class.getSimpleName();
-    public static final String DAILY_FORECAST = "DAILY_FORECAST";
-    public static final String HOURLY_FORECAST = "HOURLY_FORECAST";
+    public static final String DAILY_FORECAST = "daily_forecast";
+    public static final String HOURLY_FORECAST = "hourly_forecast";
+    private static final String DAILY_FRAGMENT = "daily_fragment" ;
+    private static final String HOURLY_FRAGMENT = "hourly_fragment";
 
     private Forecast mForecast;
 
@@ -274,6 +278,20 @@ public class MainActivity extends AppCompatActivity implements DailyFragment.onD
         dialog.show(getFragmentManager(), "error_dialog");
     }
 
+    @Override
+    public void onBackPressed() {
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment activeFragment = fragmentManager.findFragmentByTag(DAILY_FRAGMENT);
+        if (activeFragment == null){
+            activeFragment = fragmentManager.findFragmentByTag(HOURLY_FRAGMENT);
+            }
+        if (activeFragment == null) {
+            finish();
+            return;
+        }
+        fragmentManager.beginTransaction().remove(activeFragment).commit();
+    }
+
     @OnClick (R.id.dailyButton)
     public void showDailyFragment(View view) {
         Bundle bundle = new Bundle();
@@ -283,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements DailyFragment.onD
         fragment.setArguments(bundle);
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.placeholder, fragment);
+        fragmentTransaction.add(R.id.placeholder, fragment, DAILY_FRAGMENT);
         fragmentTransaction.commit();
 
     }
@@ -297,20 +315,20 @@ public class MainActivity extends AppCompatActivity implements DailyFragment.onD
         fragment.setArguments(bundle);
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.placeholder, fragment);
+        fragmentTransaction.add(R.id.placeholder, fragment, HOURLY_FRAGMENT);
         fragmentTransaction.commit();
     }
 
     @Override
-    public void onDailyForecastSelected(int index) {
-        Day [] days = mForecast.getDailyForecast();
-        String dayOfTheWeek = days[index].getDayOfTheWeek();
-        String conditions = days[index].getSummary();
-        String highTemp = days[index].getTemperatureMax() + "";
-        String message = String.format("On %s the high will be %s and it will be %s",
-                dayOfTheWeek,
-                highTemp,
-                conditions);
+    public void onHourlyForecastSelected(int index) {
+        Hour [] hours = mForecast.getHourlyForecast();
+        String time = hours[index].getHour();
+        String temperature = hours[index].getTemperature()+"";
+        String summary = hours [index].getSummary();
+        String message = String.format("At %s it will be %s and %s",
+                time,
+                temperature,
+                summary);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

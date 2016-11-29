@@ -4,25 +4,20 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import teamtreehouse.com.stormy.R;
-import teamtreehouse.com.stormy.ui.DailyFragment;
 import teamtreehouse.com.stormy.weather.Day;
 
-public class DayAdapter extends BaseAdapter implements View.OnClickListener {
+public class DayAdapter extends BaseAdapter implements AdapterView.OnItemClickListener{
 
-    private DailyFragment.onDailyForecastSelectedInterface mListener;
-    private Context mContext;
     private Day[] mDays;
-    private int mIndex;
 
-    public DayAdapter(Context context, Day[] days, DailyFragment.onDailyForecastSelectedInterface listener) {
-        mContext = context;
-        mDays = days;
-        mListener = listener;
+    public DayAdapter(Day[] days) {
+         mDays = days;
     }
 
     @Override
@@ -43,10 +38,10 @@ public class DayAdapter extends BaseAdapter implements View.OnClickListener {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-        mIndex = position;
+
         if (convertView == null) {
             // brand new
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.daily_list_item, null);
+            convertView = LayoutInflater.from (parent.getContext()).inflate(R.layout.daily_list_item, null);
             holder = new ViewHolder();
             holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
             holder.temperatureLabel = (TextView) convertView.findViewById(R.id.temperatureLabel);
@@ -74,8 +69,8 @@ public class DayAdapter extends BaseAdapter implements View.OnClickListener {
     }
 
     @Override
-    public void onClick(View view) {
-        mListener.onDailyForecastSelected(mIndex);
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
     }
 
     private static class ViewHolder {
@@ -83,10 +78,8 @@ public class DayAdapter extends BaseAdapter implements View.OnClickListener {
         TextView temperatureLabel;
         TextView dayLabel;
     }
+
 }
-
-
-
 
 
 
