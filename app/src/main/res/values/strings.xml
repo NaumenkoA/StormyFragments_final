@@ -12,5 +12,14 @@
     <string name="no_daily_forecast_data">There is no data to display.</string>
     <string name="title_activity_hourly_forecast">HourlyForecastActivity</string>
     <string name="no_coordinates">No internet connection is available. The place of the forecast is set automatically to Moscow</string>
+    <string name="sunrise">Sunrise:</string>
+    <string name="pressure">Pressure:</string>
+    <string name="sunset">Sunset:</string>
+    <string name="humidity">Humidity:</string>
+    <string name="moon">Moon:</string>
+    <string name="rain_snow">Rain/snow?:</string>
+    <string name="cloud_cover">Cloud cover:</string>
+    <string name="wind_speed">Wind speed:</string>
+    <string name="visibility">Visibility:</string>
 
 </resources>

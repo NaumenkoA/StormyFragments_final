@@ -3,6 +3,7 @@ package teamtreehouse.com.stormy.weather;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -15,6 +16,64 @@ public class Hour implements Parcelable {
     private double mTemperature;
     private String mIcon;
     private String mTimezone;
+    private double mHumidity;
+    private double mCloudCover;
+    private double mVisibility;
+    private double mWindSpeed;
+    private double mPressure;
+    private double mPrecipChance;
+
+    public double getPrecipChance() {
+        return mPrecipChance;
+    }
+
+    public void setPrecipChance(double precipChance) {
+        mPrecipChance = precipChance;
+    }
+
+    public double getCloudCover() {
+        return mCloudCover;
+    }
+
+    public void setCloudCover(double cloudCover) {
+        mCloudCover = cloudCover;
+    }
+
+    public double getVisibility() {
+        return mVisibility;
+    }
+
+    public void setVisibility(double visibility) {
+        mVisibility = visibility;
+    }
+
+    public double getWindSpeed() {
+        return mWindSpeed;
+    }
+
+    public void setWindSpeed(double windSpeed) {
+        mWindSpeed = windSpeed;
+    }
+
+    public String getPressure() {
+        DecimalFormat df = new DecimalFormat("0.0");
+        return df.format(mPressure);
+    }
+
+    public void setPressure(double pressure) {
+        mPressure = pressure;
+    }
+
+    public double getHumidity() {
+        return mHumidity;
+    }
+
+    public void setHumidity(double humidity) {
+        mHumidity = humidity;
+    }
+
+
+
 
     public Hour() { }
 
@@ -70,24 +129,36 @@ public class Hour implements Parcelable {
 
     @Override
     public int describeContents() {
-        return 0; // ignore
+        return 0;
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(mTime);
-        dest.writeDouble(mTemperature);
-        dest.writeString(mSummary);
-        dest.writeString(mIcon);
-        dest.writeString(mTimezone);
+        dest.writeLong(this.mTime);
+        dest.writeString(this.mSummary);
+        dest.writeDouble(this.mTemperature);
+        dest.writeString(this.mIcon);
+        dest.writeString(this.mTimezone);
+        dest.writeDouble(this.mHumidity);
+        dest.writeDouble(this.mCloudCover);
+        dest.writeDouble(this.mVisibility);
+        dest.writeDouble(this.mWindSpeed);
+        dest.writeDouble(this.mPressure);
+        dest.writeDouble(this.mPrecipChance);
     }
 
-    private Hour(Parcel in) {
-        mTime = in.readLong();
-        mTemperature = in.readDouble();
-        mSummary = in.readString();
-        mIcon = in.readString();
-        mTimezone = in.readString();
+    protected Hour(Parcel in) {
+        this.mTime = in.readLong();
+        this.mSummary = in.readString();
+        this.mTemperature = in.readDouble();
+        this.mIcon = in.readString();
+        this.mTimezone = in.readString();
+        this.mHumidity = in.readDouble();
+        this.mCloudCover = in.readDouble();
+        this.mVisibility = in.readDouble();
+        this.mWindSpeed = in.readDouble();
+        this.mPressure = in.readDouble();
+        this.mPrecipChance = in.readDouble();
     }
 
     public static final Creator<Hour> CREATOR = new Creator<Hour>() {

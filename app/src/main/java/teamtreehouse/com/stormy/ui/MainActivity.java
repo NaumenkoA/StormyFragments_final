@@ -1,14 +1,13 @@
 package teamtreehouse.com.stormy.ui;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -40,7 +39,7 @@ import teamtreehouse.com.stormy.weather.Forecast;
 import teamtreehouse.com.stormy.weather.Hour;
 
 
-public class MainActivity extends Activity
+public class MainActivity extends AppCompatActivity
         implements HourlyFragment.onHourlyForecastSelectedInterface {
 
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -49,6 +48,7 @@ public class MainActivity extends Activity
     private static final String DAILY_FRAGMENT = "daily_fragment" ;
     private static final String HOURLY_FRAGMENT = "hourly_fragment";
 
+    private boolean mIsTablet;
     private Forecast mForecast;
 
     @InjectView(R.id.timeLabel)
@@ -74,8 +74,8 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
-
-       mProgressBar.setVisibility(View.INVISIBLE);
+        mIsTablet = getResources().getBoolean(R.bool.is_tablet);
+        mProgressBar.setVisibility(View.INVISIBLE);
 
         final double latitude = 37.8267;
         final double longitude = -122.423;
@@ -207,6 +207,14 @@ public class MainActivity extends Activity
             day.setTemperatureMax(jsonDay.getDouble("temperatureMax"));
             day.setTime(jsonDay.getLong("time"));
             day.setTimezone(timezone);
+            day.setHumidity(jsonDay.getDouble("humidity"));
+            day.setCloudCover(jsonDay.getDouble("cloudCover"));
+            day.setWindSpeed(jsonDay.getDouble("windSpeed"));
+            day.setPressure(jsonDay.getDouble("pressure"));
+            day.setPrecipChance(jsonDay.getDouble("precipProbability"));
+            day.setMoonPhase(jsonDay.getDouble("moonPhase"));
+            day.setSunriseTime(jsonDay.getLong("sunriseTime"));
+            day.setSunsetTime(jsonDay.getLong("sunsetTime"));
 
             days[i] = day;
         }
@@ -231,6 +239,12 @@ public class MainActivity extends Activity
             hour.setTemperature(jsonHour.getDouble("temperature"));
             hour.setTime(jsonHour.getLong("time"));
             hour.setTimezone(timezone);
+            hour.setHumidity(jsonHour.getDouble("humidity"));
+            hour.setCloudCover(jsonHour.getDouble("cloudCover"));
+            hour.setVisibility(jsonHour.getDouble("visibility"));
+            hour.setWindSpeed(jsonHour.getDouble("windSpeed"));
+            hour.setPressure(jsonHour.getDouble("pressure"));
+            hour.setPrecipChance(jsonHour.getDouble("precipProbability"));
 
             hours[i] = hour;
         }
@@ -280,7 +294,7 @@ public class MainActivity extends Activity
 
     @Override
     public void onBackPressed() {
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment activeFragment = fragmentManager.findFragmentByTag(DAILY_FRAGMENT);
         if (activeFragment == null){
             activeFragment = fragmentManager.findFragmentByTag(HOURLY_FRAGMENT);
@@ -294,26 +308,40 @@ public class MainActivity extends Activity
 
     @OnClick (R.id.dailyButton)
     public void showDailyFragment(View view) {
-        Bundle bundle = new Bundle();
-        Day[] days = mForecast.getDailyForecast();
-        bundle.putParcelableArray(DAILY_FORECAST, days);
-        Fragment fragment = new DailyFragment();
-        fragment.setArguments(bundle);
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.placeholder, fragment, DAILY_FRAGMENT);
-        fragmentTransaction.commit();
+        Fragment fragment;
+        if (mIsTablet) {
+            fragment = new DailyDualPaneFragment();
+        }
 
-    }
+                else {
+            fragment = new DailyFragment();
+        }
+
+            Bundle bundle = new Bundle();
+            Day[] days = mForecast.getDailyForecast();
+            bundle.putParcelableArray(DAILY_FORECAST, days);
+            fragment.setArguments(bundle);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.placeholder, fragment, DAILY_FRAGMENT);
+            fragmentTransaction.commit();
+            }
 
     @OnClick (R.id.hourlyButton)
     public void showHourlyFragment(View view) {
+        Fragment fragment;
+        if (mIsTablet) {
+            fragment = new HourlyDualPaneFragment();
+        }
+
+        else {
+            fragment = new HourlyFragment();
+        }
         Bundle bundle = new Bundle();
         Hour[] hours = mForecast.getHourlyForecast();
         bundle.putParcelableArray(HOURLY_FORECAST, hours);
-        Fragment fragment = new HourlyFragment();
         fragment.setArguments(bundle);
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.placeholder, fragment, HOURLY_FRAGMENT);
         fragmentTransaction.commit();
