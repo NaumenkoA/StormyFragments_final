@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setActivityBackground(Current current) {
         Drawable drawable;
-        if (current.getTemperature() < 40) {
+        if (current.getTemperature() < 41) {
             mIsCold = true;
         } else {
             mIsCold = false;
