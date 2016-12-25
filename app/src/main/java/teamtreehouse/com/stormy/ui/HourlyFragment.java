@@ -16,26 +16,17 @@ import teamtreehouse.com.stormy.R;
 import teamtreehouse.com.stormy.adapters.HourAdapter;
 import teamtreehouse.com.stormy.weather.Hour;
 
-public class HourlyFragment extends Fragment {
-    private Hour[] mHours;
+public class HourlyFragment extends BaseHourlyFragment {
 
     public interface onHourlyForecastSelectedInterface {
-        void onHourlyForecastSelected (int index);
+        void onHourlyForecastSelected(int index);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_hourly_forecast, container, false);
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-        Bundle bundle = getArguments();
-        Parcelable[] parcelables =  bundle.getParcelableArray(MainActivity.HOURLY_FORECAST);
-        mHours = Arrays.copyOf(parcelables, parcelables.length, Hour[].class);
+    public RecyclerView.Adapter setHourAdapter() {
         onHourlyForecastSelectedInterface listener = (onHourlyForecastSelectedInterface) getActivity();
-        HourAdapter adapter = new HourAdapter (mHours, listener);
-        recyclerView.setAdapter(adapter);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
-        return view;
+        return new HourAdapter(getHours(), listener);
     }
 }
+
+

@@ -13,7 +13,7 @@ import teamtreehouse.com.stormy.R;
 import teamtreehouse.com.stormy.ui.HourlyFragment;
 import teamtreehouse.com.stormy.weather.Hour;
 
-public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder> {
+public class HourAdapter extends BaseHourAdapter {
 
     private Hour[] mHours;
     private HourlyFragment.onHourlyForecastSelectedInterface mListener;
@@ -21,60 +21,19 @@ public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder
     public HourAdapter(Hour[] hours, HourlyFragment.onHourlyForecastSelectedInterface listener) {
         mHours = hours;
         mListener = listener;
+}
+
+    @Override
+    public void doOnItemClick(int position) {
+        mListener.onHourlyForecastSelected(position);
     }
 
     @Override
-    public HourViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.hourly_list_item, parent, false);
-        HourViewHolder viewHolder = new HourViewHolder(view);
-        return viewHolder;
-    }
-
-    @Override
-    public void onBindViewHolder(HourViewHolder holder, int position) {
-        holder.bindHour(mHours[position]);
-            }
-
-    @Override
-    public int getItemCount() {
-        return mHours.length;
-    }
-
-
-    public class HourViewHolder extends RecyclerView.ViewHolder
-            implements View.OnClickListener {
-
-        public TextView mTimeLabel;
-        public TextView mSummaryLabel;
-        public TextView mTemperatureLabel;
-        public ImageView mIconImageView;
-        private int mIndex;
-
-        public HourViewHolder(View itemView) {
-            super(itemView);
-
-            mTimeLabel = (TextView) itemView.findViewById(R.id.timeLabel);
-            mSummaryLabel = (TextView) itemView.findViewById(R.id.summaryLabel);
-            mTemperatureLabel = (TextView) itemView.findViewById(R.id.temperatureLabel);
-            mIconImageView = (ImageView) itemView.findViewById(R.id.iconImageView);
-
-            itemView.setOnClickListener(this);
-        }
-
-        public void bindHour(Hour hour) {
-            mTimeLabel.setText(hour.getHour());
-            mSummaryLabel.setText(hour.getSummary());
-            mTemperatureLabel.setText(hour.getTemperature() + "");
-            mIconImageView.setImageResource(hour.getIconId());
-        }
-
-        @Override
-        public void onClick(View v) {
-                    mListener.onHourlyForecastSelected(getAdapterPosition());
-        }
+    public Hour[] setHours() {
+        return mHours;
     }
 }
+
 
 
 

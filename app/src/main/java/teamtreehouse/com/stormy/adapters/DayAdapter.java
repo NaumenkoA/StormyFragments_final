@@ -1,6 +1,7 @@
 package teamtreehouse.com.stormy.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,15 +11,28 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import teamtreehouse.com.stormy.R;
+import teamtreehouse.com.stormy.ui.DailyFragmentTablet;
 import teamtreehouse.com.stormy.weather.Day;
 
-public class DayAdapter extends BaseAdapter implements AdapterView.OnItemClickListener{
+public class DayAdapter extends BaseAdapter  {
 
     private Day[] mDays;
+    private boolean mIsCold;
 
-    public DayAdapter(Day[] days) {
-         mDays = days;
+
+
+    public DayAdapter(Day[] days, boolean isCold) {
+
+        mDays = days;
+        mIsCold = isCold;
     }
+
+    public DayAdapter(Day[] days,
+                      DailyFragmentTablet.onDailyForecastSelectedInterface listener,
+                      boolean isCold) {
+        mDays = days;
+        mIsCold = isCold;
+         }
 
     @Override
     public int getCount() {
@@ -56,6 +70,9 @@ public class DayAdapter extends BaseAdapter implements AdapterView.OnItemClickLi
         Day day = mDays[position];
 
         holder.iconImageView.setImageResource(day.getIconId());
+        if (mIsCold) {
+            holder.temperatureLabel.setTextColor(Color.parseColor("#3c5aee"));
+        }
         holder.temperatureLabel.setText(day.getTemperatureMax() + "");
 
         if (position == 0) {
@@ -68,10 +85,6 @@ public class DayAdapter extends BaseAdapter implements AdapterView.OnItemClickLi
         return convertView;
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-    }
 
     private static class ViewHolder {
         ImageView iconImageView; // public by default

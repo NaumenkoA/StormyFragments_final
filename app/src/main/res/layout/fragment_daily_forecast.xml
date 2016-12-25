@@ -3,19 +3,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/dailyForecastLayout"
-                android:background="@drawable/bg_gradient_warm">
+                tools:background="@drawable/bg_gradient_warm">
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:descendantFocusability="blocksDescendants"
         android:id="@+id/listView"
         android:layout_alignParentTop="false"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/thisWeekLabel"
         android:layout_above="@+id/locationLabel"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:divider="@null"
         android:dividerHeight="0dp"/>
 
@@ -37,7 +36,8 @@
         android:layout_centerHorizontal="true"
         android:textColor="#ffffffff"
         android:textSize="30sp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="20dp"/>
 
     <TextView
         android:layout_width="wrap_content"

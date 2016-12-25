@@ -79,13 +79,16 @@ public class Day implements Parcelable {
         mSunsetTime = sunsetTime;
     }
 
-    public double getCloudCover() {
-        return mCloudCover;
+    public String getCloudCover() {
+
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format(mCloudCover*100);
     }
 
     public void setCloudCover(double cloudCover) {
+
         mCloudCover = cloudCover;
-    }
+            }
 
     public double getMoonPhase() {
         return mMoonPhase;

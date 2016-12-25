@@ -11,9 +11,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -47,9 +51,12 @@ public class MainActivity extends AppCompatActivity
     public static final String HOURLY_FORECAST = "hourly_forecast";
     private static final String DAILY_FRAGMENT = "daily_fragment" ;
     private static final String HOURLY_FRAGMENT = "hourly_fragment";
+    private static final String FRAGMENT_TAG = "fragment_tag" ;
+    public static final String IS_COLD = "is_it_cold";
 
     private boolean mIsTablet;
     private Forecast mForecast;
+    private boolean mIsCold;
 
     @InjectView(R.id.timeLabel)
     TextView mTimeLabel;
@@ -67,6 +74,24 @@ public class MainActivity extends AppCompatActivity
     ImageView mRefreshImageView;
     @InjectView(R.id.progressBar)
     ProgressBar mProgressBar;
+    @InjectView(R.id.mainLayout)
+    RelativeLayout mRelativeLayout;
+    @InjectView(R.id.placeholder)
+    FrameLayout mPlaceholder;
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Fragment fragment = getVisibleFragment();
+        String fragmentTag;
+        if (fragment == null) {
+            fragmentTag = null;
+        } else {
+            fragmentTag = fragment.getTag();
+        }
+            outState.putString(FRAGMENT_TAG, fragmentTag);
+            super.onSaveInstanceState(outState);
+        }
 
 
     @Override
@@ -75,22 +100,38 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
         mIsTablet = getResources().getBoolean(R.bool.is_tablet);
+
         mProgressBar.setVisibility(View.INVISIBLE);
 
         final double latitude = 37.8267;
         final double longitude = -122.423;
 
-       mRefreshImageView.setOnClickListener(new View.OnClickListener() {
+        mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getForecast(latitude, longitude);
+                getForecast(latitude, longitude, null);
             }
         });
+       getForecast(latitude, longitude, savedInstanceState);
 
-        getForecast(latitude, longitude);
+        }
+
+
+
+    public Fragment getVisibleFragment(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        List<Fragment> fragments = fragmentManager.getFragments();
+        if(fragments != null){
+            for(Fragment fragment : fragments){
+                if(fragment != null && fragment.isVisible())
+                    return fragment;
+            }
+        }
+        return null;
     }
 
-    private void getForecast(double latitude, double longitude) {
+
+    private void getForecast(double latitude, double longitude, final Bundle bundle) {
         String apiKey = "7443e9aa512ca789f767aeec261b2b5c";
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey +
                 "/" + latitude + "," + longitude;
@@ -133,7 +174,7 @@ public class MainActivity extends AppCompatActivity
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    updateDisplay();
+                                    updateDisplay(bundle);
                                 }
                             });
                         } else {
@@ -166,7 +207,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void updateDisplay() {
+    private void updateDisplay(Bundle bundle) {
         Current current = mForecast.getCurrent();
 
         mTemperatureLabel.setText(current.getTemperature() + "");
@@ -178,6 +219,35 @@ public class MainActivity extends AppCompatActivity
         // Depreciated method getDrawable () Replaced
         Drawable drawable = ResourcesCompat.getDrawable(getResources(), current.getIconId(), null);
         mIconImageView.setImageDrawable(drawable);
+        setActivityBackground(current);
+
+        if (bundle != null &&
+                bundle.getString(FRAGMENT_TAG) != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            String fragmentTag = bundle.getString(FRAGMENT_TAG);
+            Fragment fragment = fragmentManager.findFragmentByTag(fragmentTag);
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.show(fragment);
+            mPlaceholder.setVisibility(View.VISIBLE);
+            transaction.commit();
+        }
+    }
+
+    private void setActivityBackground(Current current) {
+        Drawable drawable;
+        if (current.getTemperature() < 40) {
+            mIsCold = true;
+        } else {
+            mIsCold = false;
+        }
+        if (mIsCold) {
+            drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.bg_gradient_cold, null);
+             } else {
+            drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.bg_gradient_warm, null);
+            }
+        mRelativeLayout.setBackground(drawable);
+        mPlaceholder.setBackground(drawable);
+        mPlaceholder.setVisibility(View.INVISIBLE);
     }
 
     private Forecast parseForecastDetails(String jsonData) throws JSONException {
@@ -298,66 +368,85 @@ public class MainActivity extends AppCompatActivity
         Fragment activeFragment = fragmentManager.findFragmentByTag(DAILY_FRAGMENT);
         if (activeFragment == null){
             activeFragment = fragmentManager.findFragmentByTag(HOURLY_FRAGMENT);
-            }
+        }
         if (activeFragment == null) {
             finish();
             return;
         }
-        fragmentManager.beginTransaction().remove(activeFragment).commit();
+        mPlaceholder.setVisibility(View.INVISIBLE);
+        removeFragmentByTag(HOURLY_FRAGMENT);
+        removeFragmentByTag(DAILY_FRAGMENT);
     }
 
     @OnClick (R.id.dailyButton)
     public void showDailyFragment(View view) {
         Fragment fragment;
-        if (mIsTablet) {
-            fragment = new DailyDualPaneFragment();
-        }
-
-                else {
-            fragment = new DailyFragment();
+        fragment = getSupportFragmentManager().findFragmentByTag(DAILY_FRAGMENT);
+        removeFragmentByTag(HOURLY_FRAGMENT);
+        if (fragment == null) {
+            if (mIsTablet) {
+                fragment = new DailyDualPaneFragment();
+            } else {
+                fragment = new DailyFragment();
+            }
         }
 
             Bundle bundle = new Bundle();
             Day[] days = mForecast.getDailyForecast();
             bundle.putParcelableArray(DAILY_FORECAST, days);
+            bundle.putBoolean(IS_COLD, mIsCold);
             fragment.setArguments(bundle);
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.add(R.id.placeholder, fragment, DAILY_FRAGMENT);
+            mPlaceholder.setVisibility(View.VISIBLE);
             fragmentTransaction.commit();
             }
+
+    private void removeFragmentByTag(String tag) {
+        Fragment hourlyFragment = getSupportFragmentManager().findFragmentByTag (tag);
+        if (hourlyFragment != null) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.remove(hourlyFragment).commit();
+        }
+    }
 
     @OnClick (R.id.hourlyButton)
     public void showHourlyFragment(View view) {
         Fragment fragment;
-        if (mIsTablet) {
-            fragment = new HourlyDualPaneFragment();
+        fragment = getSupportFragmentManager().findFragmentByTag(HOURLY_FRAGMENT);
+        removeFragmentByTag(DAILY_FRAGMENT);
+        if (fragment == null) {
+            if (mIsTablet) {
+                fragment = new HourlyDualPaneFragment();
+            } else {
+                fragment = new HourlyFragment();
+            }
+            Bundle bundle = new Bundle();
+            Hour[] hours = mForecast.getHourlyForecast();
+            bundle.putParcelableArray(HOURLY_FORECAST, hours);
+            fragment.setArguments(bundle);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.placeholder, fragment, HOURLY_FRAGMENT);
+            mPlaceholder.setVisibility(View.VISIBLE);
+            fragmentTransaction.commit();
         }
-
-        else {
-            fragment = new HourlyFragment();
-        }
-        Bundle bundle = new Bundle();
-        Hour[] hours = mForecast.getHourlyForecast();
-        bundle.putParcelableArray(HOURLY_FORECAST, hours);
-        fragment.setArguments(bundle);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.placeholder, fragment, HOURLY_FRAGMENT);
-        fragmentTransaction.commit();
     }
 
     @Override
     public void onHourlyForecastSelected(int index) {
-        Hour [] hours = mForecast.getHourlyForecast();
-        String time = hours[index].getHour();
-        String temperature = hours[index].getTemperature()+"";
-        String summary = hours [index].getSummary();
-        String message = String.format("At %s it will be %s and %s",
-                time,
-                temperature,
-                summary);
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        if (!mIsTablet) {
+            Hour[] hours = mForecast.getHourlyForecast();
+            String time = hours[index].getHour();
+            String temperature = hours[index].getTemperature() + "";
+            String summary = hours[index].getSummary();
+            String message = String.format("At %s it will be %s and %s",
+                    time,
+                    temperature,
+                    summary);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
     }
 }
 

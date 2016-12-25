@@ -31,8 +31,9 @@ public class Hour implements Parcelable {
         mPrecipChance = precipChance;
     }
 
-    public double getCloudCover() {
-        return mCloudCover;
+    public String getCloudCover() {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format(mCloudCover*100);
     }
 
     public void setCloudCover(double cloudCover) {
@@ -161,7 +162,7 @@ public class Hour implements Parcelable {
         this.mPrecipChance = in.readDouble();
     }
 
-    public static final Creator<Hour> CREATOR = new Creator<Hour>() {
+    public static final Parcelable.Creator <Hour> CREATOR = new Parcelable.Creator <Hour>() {
         @Override
         public Hour createFromParcel(Parcel source) {
             return new Hour(source);
